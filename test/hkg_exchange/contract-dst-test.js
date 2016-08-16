@@ -10,71 +10,48 @@ var workbench = new Workbench({
 
 workbench.startTesting('HKGExchange', function(contracts) {
 
-var log     = console.log;
-var sandbox = workbench.sandbox;
+  var log     = console.log;
+  var sandbox = workbench.sandbox;
 
-var exchage;
-var hackerGold;
-  
-  it('init-hkg', function(done) {
+  var exchage;
+  var hackerGold;
 
-    contracts.HackerGold.new()
-    
-       .then(function(contract) {
-    
-               if (contract.address){
-
-                 hackerGold = contract;
-               } else {
-                 
-                 done(new Error('No contract address'));
-               }        
-      
-    }).then(done).catch(done);
+  it('init-hkg', function() {
+    return contracts.HackerGold.new()
+    .then(function(contract) {
+      if (contract.address){
+        hackerGold = contract;
+        return true;
+      } else {
+        throw new Error('No contract address');
+      }        
+    });
   });
 
-  
-  it('init-hkg-exchange', function(done) {
-
-    contracts.HKGExchange.new()
-    
-       .then(function(contract) {
-    
-               if (contract.address){
-
-                 exchage = contract;
-                 
-               } else {
-                 
-                 done(new Error('No contract address'));
-               }  
-
-               
-               
-    }).then(done).catch(done);
+  it('init-hkg-exchange', function() {
+    return contracts.HKGExchange.new()
+    .then(function(contract) {
+      if (contract.address){
+        exchage = contract;
+        return true;
+      } else {
+        throw new Error('No contract address');
+      }  
+    });
   });
-  
 
-  it('enlist', function(done) {
-
-
-    exchage.enlist("Merkle3", '0xed2a3d9f938e13cd947ec05abc7fe734df8dd826',
-    {
+  it('enlist', function() {
+    return exchage.enlist("Merkle3", '0xed2a3d9f938e13cd947ec05abc7fe734df8dd826', {
       from: '0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826',
       value: sandbox.web3.toWei(0, 'ether')
     })
-    
     .then(function (txHash) {
-        
-        workbench.waitForReceipt(txHash);
-    
-        var exist = exchage.isExist('Merkle3')
-        assert.equal(exist, true);
-        return done();
+      return workbench.waitForReceipt(txHash);
     })
-    
-        
+    .then(function(receipt) {
+      var exist = exchage.isExist('Merkle3')
+      assert.equal(exist, true);
+      return true;
+    });
   });
-
-
 });
